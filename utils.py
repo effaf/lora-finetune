@@ -19,14 +19,15 @@ def set_logger(logger_name):
     return logger
 
 def is_colab():
-    """Detect if running in Google Colab."""
-    try:
-        "google.colab" in str(get_ipython())
-        logger.info ("google.colab found thru get_ipython()")
-    except NameError:
-        logger.info ("google.colab missing, could not find get_ipython()")
-        return False
-    return True
+    """Detect if running in Google Colab by checking for Colab-specific environment variables or directories."""
+    import os
+    from pathlib import Path
+    # Check for Colab-specific environment variable or /content directory
+    if os.environ.get("COLAB_GPU") is not None:
+        return True
+    if Path("/content").exists():
+        return True
+    return False
 
 def load_env():
     """
