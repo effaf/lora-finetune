@@ -30,7 +30,7 @@ combined_df = utils.combine_dfs(df_train, df_test)
 if utils.is_colab():
     subset_df = combined_df
 else:
-    subset_df = combined_df.sample(frac=1 random_state=42) 
+    subset_df = combined_df.sample(frac=0.1, random_state=42) 
 
 # Run sentiment analysis on the subset
 texts = subset_df['text'].tolist()
