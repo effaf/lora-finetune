@@ -21,9 +21,12 @@ def set_logger(logger_name):
 def is_colab():
     """Detect if running in Google Colab."""
     try:
-        return "google.colab" in str(get_ipython())
+        "google.colab" in str(get_ipython())
+        logger.info ("google.colab found thru get_ipython()")
     except NameError:
+        logger.info ("google.colab missing, could not find get_ipython()")
         return False
+    return True
 
 def load_env():
     """
