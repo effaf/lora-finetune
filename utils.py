@@ -16,6 +16,7 @@ def set_logger(logger_name):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
+    logger.propagate = False
     return logger
 
 def is_colab():

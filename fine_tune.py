@@ -27,7 +27,10 @@ df_train = utils.load_data('train_small.csv')
 df_test = utils.load_data('test_small.csv')
 
 combined_df = utils.combine_dfs(df_train, df_test)
-subset_df = combined_df.sample(frac=0.1, random_state=42)
+if utils.is_colab():
+    subset_df = combined_df
+else:
+    subset_df = combined_df.sample(frac=1 random_state=42) 
 
 # Run sentiment analysis on the subset
 texts = subset_df['text'].tolist()
