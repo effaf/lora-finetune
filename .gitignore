@@ -2,5 +2,5 @@
 __pycache*
 
 #Environement Files
-.venv
-.env
+.venv*
+.env*

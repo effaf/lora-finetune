@@ -9,7 +9,7 @@ import torch
 from wordcloud import WordCloud, STOPWORDS
 import warnings
 
-logger = utils.set_logger (__name__)
+logger = utils.init (__name__)
 
 # Check if GPU is available and set the device accordingly
 if torch.cuda.is_available():

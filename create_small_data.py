@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import utils
 
-logger = utils.set_logger (__name__)
+logger = utils.init (__name__)
 
 # read in the data and add headers.
 df_train = utils.load_data ('train.csv')
