@@ -3,3 +3,6 @@ __pycache*
 
 #Environement Files
 .venv*
+
+#lora folder
+lora_bert_pmpmaster_dynamic
