@@ -33,14 +33,10 @@ else:
 
 # Load tiny IMDb dataset (simulating PMPMaster feedback)
 full_dataset = load_dataset("imdb")
-# Randomly sample 100 for train and 20 for test
-train_indices = random.sample(range(len(full_dataset['train'])), 100)
-test_indices = random.sample(range(len(full_dataset['test'])), 20)
-train_sample = full_dataset['train'].select(train_indices)
-test_sample = full_dataset['test'].select(test_indices)
+# Sample 100 train and 20 test examples
 dataset = DatasetDict({
-    'train': train_sample,
-    'test': test_sample
+    'train': full_dataset['train'].shuffle(seed=42).select(range(100)),
+    'test': full_dataset['test'].shuffle(seed=42).select(range(20))
 })
 
 if not utils.is_colab():
@@ -85,11 +81,9 @@ def compute_metrics(eval_pred):
 training_args = TrainingArguments(
     output_dir="./lora_bert_pmpmaster_dynamic",
     
-    # copilot - this added to avoid an error
+    # copilot - recommended  to add to avoid eval_loss key error
     do_eval=True,
-
-    # copilot suggested to add this, otherwise were getting eval_loss key error due to compute_metrics not being called
-    label_names=["labels"], 
+    label_names=["labels"], # apparently forces compute_metrics to be called
 
     evaluation_strategy="epoch",
     learning_rate=2e-4,
