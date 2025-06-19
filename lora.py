@@ -29,11 +29,15 @@ if utils.is_colab():
     max_length = 128  # Longer sequences for better accuracy
     lora_rank = 8  # Higher rank for Colab's resources
     num_epochs=3
+    save_strategy="steps"
+    save_steps=500
 else:
     batch_size = 4  # Smaller batch for laptop CPU
     max_length = 64  # Shorter sequences for memory efficiency
     lora_rank = 4  # Lower rank for laptop
     num_epochs=3 # for local fast execution stopping after 1 epoch
+    save_strategy="epoch"
+    save_steps=1
 
 # Load tiny IMDb dataset (simulating PMPMaster feedback)
 full_dataset = load_dataset("imdb")
@@ -83,7 +87,7 @@ def compute_metrics(eval_pred):
 
 # Define training arguments
 training_args = TrainingArguments(
-    output_dir="./lora_bert_pmpmaster_dynamic",
+    output_dir="../data/lora_finetune/lora_bert_pmpmaster_dynamic",
     
     # copilot - recommended  to add to avoid eval_loss key error
     do_eval=True,
@@ -99,7 +103,9 @@ training_args = TrainingArguments(
     num_train_epochs=num_epochs,
     weight_decay=0.01,
     logging_steps=1,  # Log every step to capture more training data
-    save_strategy="epoch",
+#    save_strategy="epoch",
+    save_strategy=save_strategy,
+    save_steps=save_steps,
 #    save_strategy="steps",
     load_best_model_at_end=True,
     fp16=False,  # Disable mixed precision for CPU
