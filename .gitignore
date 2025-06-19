@@ -9,3 +9,6 @@ lora_bert_pmpmaster_dynamic
 
 #Wandb
 wandb
+
+#loss png files
+losses_plot.png

@@ -43,9 +43,9 @@ dataset = DatasetDict({
     'test': full_dataset['test'].shuffle(seed=42).select(range(20))
 })
 
-if not utils.is_colab():
-    logger.info ("train labels:%s", [x["label"] for x in dataset["train"]])
-    logger.info ("test labels:%s", [x["label"] for x in dataset["test"]])
+#if not utils.is_colab():
+#    logger.info ("train labels:%s", [x["label"] for x in dataset["train"]])
+#    logger.info ("test labels:%s", [x["label"] for x in dataset["test"]])
 
 # Load tokenizer and model
 model_name = "bert-base-uncased"
@@ -90,7 +90,9 @@ training_args = TrainingArguments(
     label_names=["labels"], # apparently forces compute_metrics to be called
 
     evaluation_strategy="epoch",
-    logging_strategy="steps",  # Ensure we log training metrics
+    logging_strategy="epoch",  # Ensure we log training metrics
+#    evaluation_strategy="steps",
+#    logging_strategy="steps",  # Ensure we log training metrics
     learning_rate=2e-4,
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
@@ -98,13 +100,14 @@ training_args = TrainingArguments(
     weight_decay=0.01,
     logging_steps=1,  # Log every step to capture more training data
     save_strategy="epoch",
+#    save_strategy="steps",
     load_best_model_at_end=True,
     fp16=False,  # Disable mixed precision for CPU
-    report_to=None
+    report_to="none"
 )
 
 # Initialize trainer
-loss_callback = loss_tracker.LossLoggingCallback()
+loss_logger = loss_tracker.CustomLossLogger(logger=logger)
 
 trainer = Trainer(
     model=model,
@@ -112,12 +115,15 @@ trainer = Trainer(
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset["test"],
     compute_metrics=compute_metrics,
-    callbacks=[loss_callback],  # Add the custom callback
+    callbacks=[loss_logger],  # Add the custom callback
 )
 
 # Train the model
 trainer.train()
 
+loss_logger.plot_losses()
+
+"""
 # Save the LoRA adapter for AWS deployment
 model.save_pretrained("lora_bert_pmpmaster_dynamic")
 tokenizer.save_pretrained("lora_bert_pmpmaster_dynamic")
@@ -132,8 +138,8 @@ def predict_feedback(text):
 
 # Test inference
 sample_feedback = "The PMP course practice exams were very helpful."
-print(f"Feedback: {sample_feedback} -> {predict_feedback(sample_feedback)}")
+logger.info(f"Feedback: {sample_feedback} -> {predict_feedback(sample_feedback)}")
 
-# Process and plot all losses with a single method call
-loss_summary = loss_plot.process_and_plot_losses(loss_callback, logger)
+"""
+
 
