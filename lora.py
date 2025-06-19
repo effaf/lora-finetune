@@ -14,6 +14,8 @@ import evaluate
 import numpy as np
 import utils 
 import random
+import loss_tracker
+import loss_plot
 
 logger=utils.init(__name__)
 
@@ -26,10 +28,12 @@ if utils.is_colab():
     batch_size = 8  # Colab may have more memory
     max_length = 128  # Longer sequences for better accuracy
     lora_rank = 8  # Higher rank for Colab's resources
+    num_epochs=3
 else:
     batch_size = 4  # Smaller batch for laptop CPU
     max_length = 64  # Shorter sequences for memory efficiency
     lora_rank = 4  # Lower rank for laptop
+    num_epochs=3 # for local fast execution stopping after 1 epoch
 
 # Load tiny IMDb dataset (simulating PMPMaster feedback)
 full_dataset = load_dataset("imdb")
@@ -86,25 +90,29 @@ training_args = TrainingArguments(
     label_names=["labels"], # apparently forces compute_metrics to be called
 
     evaluation_strategy="epoch",
+    logging_strategy="steps",  # Ensure we log training metrics
     learning_rate=2e-4,
     per_device_train_batch_size=batch_size,
     per_device_eval_batch_size=batch_size,
-    num_train_epochs=3,
+    num_train_epochs=num_epochs,
     weight_decay=0.01,
-    logging_steps=5,
+    logging_steps=1,  # Log every step to capture more training data
     save_strategy="epoch",
     load_best_model_at_end=True,
-    report_to="none",
     fp16=False,  # Disable mixed precision for CPU
+    report_to=None
 )
 
 # Initialize trainer
+loss_callback = loss_tracker.LossLoggingCallback()
+
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=encoded_dataset["train"],
     eval_dataset=encoded_dataset["test"],
     compute_metrics=compute_metrics,
+    callbacks=[loss_callback],  # Add the custom callback
 )
 
 # Train the model
@@ -126,4 +134,6 @@ def predict_feedback(text):
 sample_feedback = "The PMP course practice exams were very helpful."
 print(f"Feedback: {sample_feedback} -> {predict_feedback(sample_feedback)}")
 
-# Note: For AWS deployment, upload to S3 and use AWS Lambda (Python runtime) with API Gateway for ReactJS front-end integration.
+# Process and plot all losses with a single method call
+loss_summary = loss_plot.process_and_plot_losses(loss_callback, logger)
+
